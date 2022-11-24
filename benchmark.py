@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from rich.progress import track
 from abc import ABC, abstractmethod
-from metrics import jaccard_coef, dice_coef
+from metrics import Jaccard, Dice
 
 import json
 
@@ -58,13 +58,15 @@ class ImgToEdgeBenchmark(Benchmark):
     super().__init__()
     self.method = method
     self.bin_v = bin_v
+    self.jaccard_coef = Jaccard()
+    self.dice_coef = Dice()
   
   def get_metrics(self) -> tp.Dict[str, float]:
     prediction = binarize(self.method(self.img), self.bin_v)
     gt = binarize(self.gt, self.bin_v)
     return {
-      "jaccard": jaccard_coef(prediction, gt),
-      "dice": dice_coef(prediction, gt)
+      "jaccard": self.jaccard_coef.score(prediction, gt),
+      "dice": self.dice_coef.score(prediction, gt)
     }
 
 class OverfittingBenchmark(Benchmark):
@@ -72,11 +74,13 @@ class OverfittingBenchmark(Benchmark):
     super().__init__()
     self.method = method
     self.bin_v = bin_v
+    self.jaccard_coef = Jaccard()
+    self.dice_coef = Dice()
 
   def get_metrics(self) -> tp.Dict[str, float]:
     imitation = binarize(self.method(self.img, self.gt), self.bin_v)
     gt = binarize(self.gt, self.bin_v)
     return {
-      "jaccard": jaccard_coef(imitation, gt),
-      "dice": dice_coef(imitation, gt)
+      "jaccard": self.jaccard_coef.score(imitation, gt),
+      "dice": self.dice_coef.score(imitation, gt)
     }

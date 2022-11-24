@@ -1,5 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
+import typing as tp
+from scipy.spatial import KDTree
 
 
 class BinaryEdgeMetric(ABC):
@@ -41,7 +43,7 @@ class Jaccard(BinaryEdgeMetric):
 
 
 class Dice(BinaryEdgeMetric):
-  def __init__(self, reg_param=.0):
+  def __init__(self, reg_param: float=.0):
     self.reg_param = reg_param
 
   def _score(self, pred: np.ndarray, gt: np.ndarray) -> float:
@@ -52,4 +54,31 @@ class Dice(BinaryEdgeMetric):
       dice -= self.reg_param * np.mean(pred)
     return dice
 
-    
+
+class NormalizedFoM(BinaryEdgeMetric):
+  def __init__(self, k_fp: float=0.1, k_fn: float=0.4):
+    self.k_fp = k_fp
+    self.k_fn = k_fn
+
+  def _score(self, pred: np.ndarray, gt: np.ndarray) -> float:
+    FP = np.sum(pred * (1 - gt))  # pred AND not gt
+    FN = np.sum(gt * (1 - pred))  # gt AND not pred
+
+    if FP + FN == 0:
+      return 1.
+
+    gt_nonzero_points = np.vstack(np.nonzero(gt)).T
+    pred_nonzero_points = np.vstack(np.nonzero(pred)).T
+
+    gt_tree = KDTree(gt_nonzero_points)
+    pred_tree = KDTree(pred_nonzero_points)
+  
+    fp_distances = gt_tree.query(pred_nonzero_points)[0]
+    fp_distances = 1 / (1 + self.k_fp * fp_distances)
+    fp_term = FP * np.sum(fp_distances) / np.sum(pred)
+
+    fn_distances = pred_tree.query(gt_nonzero_points)[0]
+    fn_distances = 1 / (1 + self.k_fn * fn_distances)
+    fn_term = FN * np.sum(fn_distances) / np.sum(gt)
+
+    return (fp_term + fn_term) / (FP + FN)
