@@ -19,6 +19,5 @@ def stat_canny(image, sigma=0.33):
   v = np.median(img)
   lower = int(max(0, (1.0 - sigma) * v))
   upper = int(min(255, (1.0 + sigma) * v))
-  print("Stat params: ", lower, upper)
   return cv.Canny(img, lower, upper)
 

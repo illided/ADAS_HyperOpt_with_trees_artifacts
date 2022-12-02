@@ -56,7 +56,7 @@ class Dice(BinaryEdgeMetric):
 
 
 class NormalizedFoM(BinaryEdgeMetric):
-  def __init__(self, k_fp: float=0.1, k_fn: float=0.4):
+  def __init__(self, k_fp: float=0.1, k_fn: float=0.2):
     self.k_fp = k_fp
     self.k_fn = k_fn
 

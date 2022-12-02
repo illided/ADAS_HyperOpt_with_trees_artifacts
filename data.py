@@ -33,8 +33,7 @@ class BIPED(Dataset):
     edges = [cv.imread(edge, cv.IMREAD_GRAYSCALE) for edge in sorted(get_filenames(edges_dir))]
     return list(zip(imgs, edges))
 
-
-  def __getitem__(self, index) -> tp.T_co:
+  def __getitem__(self, index) -> tp.Tuple[np.ndarray, np.ndarray]:
     return self.data[index]
 
   def __len__(self) -> int:
@@ -53,11 +52,11 @@ def segmentation_to_edge(segmentation) -> np.ndarray:
         contour_img = cv.drawContours(contour_img, contours, -1, (255, 255, 255), 0)
     return contour_img
 
-def apply_roi(img, edge, up_cut=0.39, low_cut=0.77) -> tp.Tuple[np.ndarray, np.ndarray]:
-    h, _ = edge.shape
+def apply_roi(img, up_cut=0.39, low_cut=0.77) -> np.ndarray:
+    h = img.shape[0]
     up_cut = int(0.39 * h)
-    low_cut = int(0.77 * w)
-    return img[up_cut:low_cut, :], edge[up_cut:low_cut, :]
+    low_cut = int(0.77 * h)
+    return img[up_cut:low_cut, :]
     
 
 class CityScapesEdges(Dataset):
@@ -66,7 +65,7 @@ class CityScapesEdges(Dataset):
     if holdout not in ["train", "val"]:
       raise ValueError("This holdout not supported yet")
 
-    self.init_image_loader(holdout, pic_size)
+    self.init_image_loader(root, holdout, pic_size)
     self.path_to_contours = join(root, "gtEdges", f"pic_size_{pic_size[0]}_{pic_size[1]}", holdout)
     if not isdir(self.path_to_contours):
       print("Couldn't find image edges")
@@ -94,7 +93,7 @@ class CityScapesEdges(Dataset):
       edges = segmentation_to_edge(segmentation)
       cv.imwrite(self._contour_file(i), edges)
   
-  def __getitem__(self, index) -> tp.T_co:
+  def __getitem__(self, index) -> tp.Tuple[np.ndarray, np.ndarray]:
     image, _ = self.get_img_segmentation(index)
     image = np.array(image)
     contours = cv.imread(self._contour_file(index), cv.IMREAD_GRAYSCALE)
