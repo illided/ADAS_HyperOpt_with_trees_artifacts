@@ -21,6 +21,7 @@ class BDD10kEdges(Dataset):
         self.img_names = []
         for img_path in get_filenames(self.img_path):
             self.img_names.append(path.split(img_path)[1].removesuffix(".jpg"))
+        self.img_names = sorted(self.img_names)
 
         self.edge_path = path.join(root, "labels", f"edges_{pic_size[1]}_{pic_size[0]}", holdout)
         if not path.isdir(self.edge_path):

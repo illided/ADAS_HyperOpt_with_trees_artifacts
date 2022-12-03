@@ -19,8 +19,8 @@ class CityScapesEdges(Dataset):
 		self.path_to_contours = join(root, "gtEdges", f"pic_size_{pic_size[0]}_{pic_size[1]}", holdout)
 		if not isdir(self.path_to_contours):
 			print("Couldn't find image edges")
-		Path(self.path_to_contours).mkdir(parents=True, exist_ok=True)
-		self._setup_contours()
+			Path(self.path_to_contours).mkdir(parents=True, exist_ok=True)
+			self._setup_contours()
 	
 	def init_image_loader(self, root, holdout, pic_size):
 		self.tv_ds = Cityscapes(root,
