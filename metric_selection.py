@@ -89,13 +89,13 @@ gt = apply_roi(gt)
 gt = binarize(gt, 250)
 st.image(cv.cvtColor(img, cv.COLOR_BGR2RGB), caption="Оригинальная фотография")
 
-edg1 = binarize(stat_canny(img), 250)
-edg2 = binarize(canny(img, 100, 200), 250)
+edg1 = binarize(canny(img, 40, 140), 250)
+edg2 = binarize(canny(img, 60, 160), 250)
 
 st.image(edg1 * 255, "Границы 1")
 st.image(edg2 * 255, "Границы 2")
 
-user_choice = st.selectbox("Выберите картинку, где алгоритм лучше передал линии на дороге",
+user_choice = st.radio("Выберите картинку, где алгоритм лучше передал линии на дороге",
                             options=["Границы 1", "Границы 2", "Затрудняюсь ответить"])
 if not st.button("Далее"):
     st.stop()
