@@ -109,7 +109,7 @@ class CityScapesRain(Dataset):
 		image_suffix = self.pic_suffixes[index % len(self.pic_suffixes)]
 		img = cv.imread(join(self.root, "leftImg8bit_rain", image_name + image_suffix))
 		img = cv.resize(img, self.pic_size[::-1])
-		edges = cv.imread(self._get_contour_path(image_name))
+		edges = cv.imread(self._get_contour_path(image_name), cv.IMREAD_GRAYSCALE)
 		return img, edges
 		
 		
