@@ -2,10 +2,12 @@ import numpy as np
 from abc import ABC, abstractmethod
 import typing as tp
 from scipy.spatial import KDTree
+import math
+from skimage.metrics import structural_similarity as ssim
 
 
 class BinaryEdgeMetric(ABC):
-	def score(self, pred: np.ndarray, gt: np.ndarray) -> float:
+	def __call__(self, pred: np.ndarray, gt: np.ndarray) -> float:
 		if pred.shape != gt.shape:
 			raise ValueError(f"Prediction and ground truth shape mismatched. Prediction: {pred.shape}. Gt: {gt.shape}")
 		if not self._is_binary(pred):
@@ -22,6 +24,25 @@ class BinaryEdgeMetric(ABC):
 	@abstractmethod
 	def _score(self, pred: np.ndarray, gt: np.ndarray) -> float:
 		...
+
+
+class MSE(BinaryEdgeMetric):
+	def _score(self, pred: np.ndarray, gt: np.ndarray) -> float:
+		n = pred.shape[0] * pred.shape[1]
+		return np.sum((pred - gt) ** 2) / n
+
+
+class PSNR(BinaryEdgeMetric):
+	def __init__(self):
+		self.mse = MSE()
+
+	def _score(self, pred: np.ndarray, gt: np.ndarray) -> float:
+		return -10 * math.log(self.mse(pred, gt))
+
+
+class SSIM(BinaryEdgeMetric):
+	def _score(self, pred: np.ndarray, gt: np.ndarray) -> float:
+		return ssim(pred, gt)
 
 
 class Jaccard(BinaryEdgeMetric):

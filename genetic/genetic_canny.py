@@ -8,7 +8,7 @@ from canny import canny
 from .common import Individual, Environment
 from .crossover import blend_crossover
 from benchmark import binarize
-from metrics import dice_coef, jaccard_coef
+from metrics import Jaccard
 
 
 class CannyIndividual(Individual):
@@ -59,7 +59,7 @@ class SimpleEnvironment(Environment):
 			def f(pred, gt):
 				pred = binarize(pred, 250)
 				gt = binarize(gt, 250)
-				return jaccard_coef(pred, gt) - 0.5 * np.mean(pred)
+				return Jaccard()(pred, gt) - 0.5 * np.mean(pred)
 		scoring = f
 		self.scoring: tp.Callable[[ndarray, ndarray], float] = scoring
 	
