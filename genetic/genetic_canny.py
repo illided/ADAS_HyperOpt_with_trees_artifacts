@@ -56,12 +56,12 @@ class SimpleEnvironment(Environment):
 		self.edges = edges
 
 		if scoring is None:
-			def f(pred, gt):
-				pred = binarize(pred, 250)
-				gt = binarize(gt, 250)
-				return Jaccard()(pred, gt) - 0.5 * np.mean(pred)
-		scoring = f
-		self.scoring: tp.Callable[[ndarray, ndarray], float] = scoring
+			scoring = Jaccard(0.5)
+		def f(pred, gt):
+			pred = binarize(pred, 250)
+			gt = binarize(gt, 250)
+			return scoring(pred, gt)
+		self.scoring: tp.Callable[[ndarray, ndarray], float] = f
 	
 	def fitness(self, individual: Individual) -> float:
 		return self.scoring(individual.behave(self.img), self.edges)

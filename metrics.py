@@ -19,7 +19,7 @@ class BinaryEdgeMetric(ABC):
 
 
 	def _is_binary(self, edge_map: np.ndarray) -> bool:
-		return set(np.unique(edge_map)) == {0, 1}
+		return set(np.unique(edge_map)).issubset({0, 1})
 
 	@abstractmethod
 	def _score(self, pred: np.ndarray, gt: np.ndarray) -> float:
@@ -93,13 +93,17 @@ class NormalizedFoM(BinaryEdgeMetric):
 
 		gt_tree = KDTree(gt_nonzero_points)
 		pred_tree = KDTree(pred_nonzero_points)
-	
-		fp_distances = gt_tree.query(pred_nonzero_points)[0]
-		fp_distances = 1 / (1 + self.k_fp * fp_distances)
-		fp_term = FP * np.sum(fp_distances) / np.sum(pred)
 
-		fn_distances = pred_tree.query(gt_nonzero_points)[0]
-		fn_distances = 1 / (1 + self.k_fn * fn_distances)
-		fn_term = FN * np.sum(fn_distances) / np.sum(gt)
+		fp_term = 0
+		if FP != 0:
+			fp_distances = gt_tree.query(pred_nonzero_points)[0]
+			fp_distances = 1 / (1 + self.k_fp * fp_distances)
+			fp_term = FP * np.sum(fp_distances) / np.sum(pred)
+
+		fn_term = 0
+		if FN != 0:
+			fn_distances = pred_tree.query(gt_nonzero_points)[0]
+			fn_distances = 1 / (1 + self.k_fn * fn_distances)
+			fn_term = FN * np.sum(fn_distances) / np.sum(gt)
 
 		return (fp_term + fn_term) / (FP + FN)
